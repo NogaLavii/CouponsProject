@@ -14,7 +14,7 @@ import javaBeans.Coupon;
 public class CompanyFacade extends ClientFacade {
 CouponDBDAO couponDBDAO=new CouponDBDAO();
 	public boolean login(String email, String password) throws Exception {
-		if (companyDBDAO.isCompanyExists(email, password)) {
+		if (companyDBDAO.doesCompanyExist(email, password)) {
 			return true;
 		} else
 			return false;
@@ -25,7 +25,7 @@ CouponDBDAO couponDBDAO=new CouponDBDAO();
 	}
 
 	public void updateCoupon(Coupon coupon) throws Exception {
-	couponDBDAO.updateCoupon(coupon);
+		couponDBDAO.updateCoupon(coupon);
 	}
 	
 
@@ -38,10 +38,8 @@ CouponDBDAO couponDBDAO=new CouponDBDAO();
 		return couponDBDAO.getAllCoupons(companyId);
 	}
 
-	ArrayList<Coupon> getCouponsByCtgry(int category_id, int companyID) throws Exception {
-		
-
-		return couponDBDAO.getCouponsByCtgry(category_id, companyID);
+	ArrayList<Coupon> getCouponsByCategory(int category_id, int companyID) throws Exception {
+		return couponDBDAO.getCouponsByCategory(category_id, companyID);
 	}
 
 	ArrayList<Coupon> getCouponsByPrice(int companyID, int price) throws Exception {
@@ -49,7 +47,7 @@ CouponDBDAO couponDBDAO=new CouponDBDAO();
 	}
 	
 	Company getOneCompany(int companyID) throws Exception{
-		return companyDBDAO.getOneCompany(companyID);
+		return companyDBDAO.getCompanyByID(companyID);
 	}
 	
 }

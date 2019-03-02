@@ -16,26 +16,26 @@ public class CustomerFacade extends ClientFacade {
 	 */
 	@Override
 	public boolean login(String email, String password) throws Exception {
-		if (customerDBDAO.isCustomerExists(email, password)) {
+		if (customerDBDAO.doesCustomerExist(email, password)) {
 			return true;
 		} else
 			return false;
 	}
 
-	public void addCouponPurchase(int customerID, int couponID) throws Exception {
-		couponDBDAO.addCouponPurchase(customerID, couponID);
+	public void purchaseCoupon(int customerID, int couponID) throws Exception {
+		couponDBDAO.purchaseCoupon(customerID, couponID);
 	}
 
-	public boolean isCouponPurchaseExists(int customerID, int couponID) throws Exception {
-		return couponDBDAO.isCouponPurchaseExists(customerID,couponID);
+	public boolean isCouponPurchased(int customerID, int couponID) throws Exception {
+		return couponDBDAO.isCouponPurchased(customerID,couponID);
 	}
 
-	public ArrayList<Coupon> getCouponsByCstmr(int customerID) throws Exception {
-		return couponDBDAO.getCouponsByCstmr(customerID);
+	public ArrayList<Coupon> getCouponsByCustomer(int customerID) throws Exception {
+		return couponDBDAO.getCouponsByCustomer(customerID);
 	}
 
-	Customer getOneCustomer(int customerID) throws Exception {
-		return customerDBDAO.getOneCustomer(customerID);
+	Customer getCustomerByID(int customerID) throws Exception {
+		return customerDBDAO.getCustomerByID(customerID);
 	}
 
 }

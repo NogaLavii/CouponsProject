@@ -9,7 +9,7 @@ import facade.*;
 
 public class Test {
 
-	public static void run(String[] args) {
+	public static void run() {
 
 
 		LoginManager loginManager = LoginManager.getInstance();
@@ -21,19 +21,19 @@ public class Test {
 			System.out.println("Testing admin CRUD...");
 			
 			// Login as admin to insert data to db
-			AdminFacade admin = (AdminFacade) loginManager.login("admin@admin.com", "1234", ClientType.ADMINISTRATOR);
+			AdminFacade admin = (AdminFacade) loginManager.login("admin@admin.com", "admin", ClientType.ADMINISTRATOR);
 			
 			// Create company objects
 			Company[] companies = new Company[5];
 			companies[0] = new Company("Nike","nike@nike.com","nikePass");
 			companies[1] = new Company("Bug","bug@bug.com","bugPass");
-			companies[2] = new Company("Ivory","ivory@ivory.com","ivoryPass");
-			companies[3] = new Company("H-Stern","h-stern@hstern.com","hsternPass123");
-			companies[4] = new Company("Castro","castro@castro.com","castroPass");
+			companies[2] = new Company("Ivory","ivory@ivory.com","ivory1");
+			companies[3] = new Company("H Stern","h-stern@hstern.com","hsten");
+			companies[4] = new Company("Castro","castro@castro.com","castro1");
 			
 			// Create customer objects
 			Customer[] customers = new Customer[5];
-			customers[0] = new Customer("Johnny","Bravo","jbrockstar@cartoonnetwork.com","jb123");
+			customers[0] = new Customer("Johnny","Bravo","jbrock@cartoon.com","jb123");
 			customers[1] = new Customer("Al","Bundy","married2@nomaam.com","4touch");
 			customers[2] = new Customer("Freddy","Krueger","fred123@elm.com","fkelm");
 			customers[3] = new Customer("Alissa","Wonder","alissa@wonderland.com","rabbit1");
@@ -44,15 +44,15 @@ public class Test {
 				admin.addCompany(c);
 			}
 			// Delete company
-			admin.deleteCompany(4);
+			admin.deleteCompany(5);
 			// Update company
-			companies[3].setName("H Stern");
+			//companies[3].setName("H Stern");
 			companies[3].setEmail("info@hstern.com");
-			companies[3].setPassword("hsternPass");
+			//companies[3].setPassword("hstern12");
 			admin.updateCompany(companies[3]);
 			// Read back from DB
-			ArrayList<Company> companiesFromDB = admin.getAllCompaniesF();
-			if (companiesFromDB.size() == 4 && companiesFromDB.get(3).getName().equals("H STERN") && companiesFromDB.get(3).getEmail().equals("hstern@hstern.com") && companiesFromDB.get(3).getPassword().equals("hsternPass")) {
+			ArrayList<Company> companiesFromDB = admin.getAllCompanies();
+			if (companiesFromDB.size() == 4 && companiesFromDB.get(3).getEmail().equals("info@hstern.com")) {
 				System.out.println("Admin - Companies --> Success");
 			}
 			else {
@@ -64,18 +64,18 @@ public class Test {
 				admin.addCustomer(c);
 			}
 			// Delete customer
-			admin.deleteCustomer(4);
+			admin.deleteCustomer(5);
 			// Update customer
 			customers[3].setFirst_name("Alice");
 			customers[3].setLast_name("Wonderland");
 			customers[3].setEmail("alice@wonderland.com");
-			customers[3].setPassword("rabbit");
+			//customers[3].setPassword("rabbit");
 			admin.updateCustomer(customers[3]);
 			// Read back from DB
-			ArrayList<Customer> customersFromDB = admin.getAllCustomersF()
+			ArrayList<Customer> customersFromDB = admin.getAllCustomers();
 			if (customersFromDB.size() == 4 && customersFromDB.get(3).getFirst_name().equals("Alice") && 
-				customersFromDB.get(3).getLast_name().equals("Wonderland") && customersFromDB.get(3).getEmail().equals("alice@wonderland.com") &&
-				customersFromDB.get(3).getPassword().equals("rabbit")) {
+				customersFromDB.get(3).getLast_name().equals("Wonderland") && customersFromDB.get(3).getEmail().equals("alice@wonderland.com"))
+			{
 				System.out.println("Admin - Customers --> Success");
 			}
 			else {
@@ -136,7 +136,7 @@ public class Test {
 
 			coupons[0].setAmount(60);
 			company.updateCoupon(coupons[0]);
-			company.deleteCoupon(1);
+			company.deleteCoupon(2);
 			
 			// Read back from DB
 			ArrayList<Coupon> couponsFromDB = company.getAllCoupons(1);
@@ -151,21 +151,20 @@ public class Test {
 			// ------------CUSTOMER-------------
 			
 			// Login as customer
-			CustomerFacade customer = (CustomerFacade) loginManager.login("jbrockstar@cartoonnetwork.com", "jb123", ClientType.CUSTOMER);
+			CustomerFacade customer = (CustomerFacade) loginManager.login("jbrock@cartoon.com", "jb123", ClientType.CUSTOMER);
 						
 			System.out.println("Testing customer CRUD...");
 			
 			// Purchase coupons
-			int customerID;
-			for (int i; i<customersFromDB.size(); i++) {
-				if (customersFromDB.get(i).getEmail().equals("jbrockstar@cartoonnetwork.com")) {
-					customerID = i;
-					break;
-				}
+			customer.purchaseCoupon(customers[0].getId(), couponsFromDB.get(0).getId());
+			ArrayList<Coupon> customersCoupons = customer.getCouponsByCustomer(customers[0].getId());
+			if (customersCoupons.size() == 1)
+			{
+				System.out.println("Success");
 			}
-			
-			customer.addCouponPurchase(customerID, couponsFromDB.get(0).getId());
-			
+			else {
+				System.out.println("Fail");
+			}
 		}
 		catch (Exception ex) {
 			System.out.println(ex.getMessage());

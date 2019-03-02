@@ -32,18 +32,18 @@ public class LoginManager {
  */
 	public ClientFacade login(String email, String password, ClientType clientType) throws Exception {
 
-		if (clientType == ClientType.Adminstrator) {
+		if (clientType == ClientType.ADMINISTRATOR) {
 			if (email == "admin@admin.com" && password == "admin") {
 				System.out.println("login succesfull");
 				return new AdminFacade();
 			}
-		} else if (clientType == ClientType.Company) {
-			if (companyDBDAO.isCompanyExists(email, password)) {
+		} else if (clientType == ClientType.COMPANY) {
+			if (companyDBDAO.doesCompanyExist(email, password)) {
 				System.out.println("login succesfull");
 				return new CompanyFacade();
 			}
-		} else if (clientType == ClientType.Customer) {
-			if (customerDBDAO.isCustomerExists(email, password)) {
+		} else if (clientType == ClientType.CUSTOMER) {
+			if (customerDBDAO.doesCustomerExist(email, password)) {
 				System.out.println("login succesfull");
 				return new CustomerFacade();
 			}

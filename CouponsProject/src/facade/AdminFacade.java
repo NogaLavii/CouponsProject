@@ -34,7 +34,7 @@ public class AdminFacade extends ClientFacade {
 	 */
 	public void addCompany(Company company) throws Exception {
 
-		if (!companyDBDAO.isCompanyExists(company.getEmail(), company.getPassword())) {
+		if (!companyDBDAO.doesCompanyExist(company.getEmail(), company.getPassword())) {
 			companyDBDAO.addCompany(company);
 		} else
 			throw new ObjectExists("This company exists on the data base already");
@@ -50,13 +50,13 @@ public class AdminFacade extends ClientFacade {
 		
 	}
 
-	public ArrayList<Company> getAllCompaniesF() throws Exception {
+	public ArrayList<Company> getAllCompanies() throws Exception {
 
 		return companyDBDAO.getAllCompanies();
 	}
 
-	public Company getOneCompany(int id) throws Exception {
-		return companyDBDAO.getOneCompany(id);
+	public Company getCompanyByID(int id) throws Exception {
+		return companyDBDAO.getCompanyByID(id);
 	}
 
 	/**
@@ -77,12 +77,12 @@ public class AdminFacade extends ClientFacade {
 		customerDBDAO.deleteCustomer(id);
 	}
 
-	public ArrayList<Customer> getAllCustomersF() throws Exception {
-		return getAllCustomersF();
+	public ArrayList<Customer> getAllCustomers() throws Exception {
+		return customerDBDAO.getAllCustomers();
 	}
 
-	public Customer getOneCustomer(int id) throws Exception {
-		return getOneCustomer(id);
+	public Customer getCustomerByID(int id) throws Exception {
+		return customerDBDAO.getCustomerByID(id);
 	}
 
 }

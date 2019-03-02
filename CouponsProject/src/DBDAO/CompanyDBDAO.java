@@ -10,6 +10,7 @@ import DAO.CompanyDAO;
 import exceptionHandling.ObjectExists;
 import javaBeans.Company;
 import javaBeans.ConnectionPool;
+import javaBeans.Coupon;
 
 public class CompanyDBDAO implements CompanyDAO<Company> {
 
@@ -125,10 +126,21 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 			connection = connectionPool.getConnection();
 
 			// prepare queries to remove company and its coupons from all relevant tables
+			CouponDBDAO couponDBDAO = new CouponDBDAO();
+			ArrayList<Coupon> coupons = couponDBDAO.getCouponsByCompany(companyID);
+			for (Coupon coupon : coupons) {
+				String custVSCop = String.format("DELETE FROM Customers_vs_Coupons WHERE coupon_id = %d", coupon.getId());
+				try (PreparedStatement preparedStatement = connection.prepareStatement(custVSCop)) {
+					preparedStatement.executeUpdate();
+					System.out.println("Coupon deleted from Customers_vs_Coupons");
+				}
+			}
+			
 			String sql = String.format("DELETE FROM Companies WHERE company_id = %d", companyID);
 			String couponSql = String.format("DELETE FROM Coupons WHERE  company_id = %d", companyID);
-			String custVSCop = String.format("DELETE FROM Customers_vs_Coupons WHERE company_id = %d", companyID);
-			System.out.println(sql + "| " + couponSql + "| " + custVSCop);
+			
+			
+			System.out.println(sql + "| " + couponSql);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
 				System.out.println("Delete success!");
@@ -138,11 +150,7 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 				preparedStatement.executeBatch();
 				System.out.println("Delete success!");
 			}
-			try (PreparedStatement preparedStatement = connection.prepareStatement(custVSCop)) {
-				System.out.println("Deleting customers perchase history");
-				preparedStatement.executeUpdate();
-				System.out.println("Delete success and complete!");
-			}
+
 		} finally {
 			connectionPool.restoreConnection(connection);
 		}

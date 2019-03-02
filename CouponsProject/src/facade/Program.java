@@ -1,5 +1,6 @@
 package facade;
 
+import test.Test;
 
 public class Program {
 /**
@@ -10,8 +11,7 @@ public class Program {
  */
 	public static void main(String[] args) {
 		try {
-			
-			Test.checkItAll();
+			Test.run();
 		} catch(Exception e) {
 			e.getStackTrace();
 }

@@ -118,7 +118,7 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("DELETE FROM Customers WHERE id = %d", customerID);
+			String sql = String.format("DELETE FROM Customers WHERE customer_id = %d", customerID);
 			String cstmrSql = String.format("DELETE FROM Customers_vs_Coupons WHERE customer_id = %d", customerID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
@@ -152,12 +152,11 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 					while (resultSet.next()) {
 
-						int id = resultSet.getInt("id");
+						int id = resultSet.getInt("customer_id");
 						String first_name = resultSet.getString("first_name");
 						String last_name = resultSet.getString("last_name");
 						String email = resultSet.getString("email");
 						String password = resultSet.getString("password");
-						allCustomers = getAllCustomers();
 
 						Customer customer = new Customer(id, first_name, last_name, email, password);
 
@@ -188,7 +187,7 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 					resultSet.next();
 
-					int id = resultSet.getInt("id");
+					int id = resultSet.getInt("customer_id");
 					String first_name = resultSet.getString("first_name");
 					String last_name = resultSet.getString("last_name");
 					String email = resultSet.getString("email");
