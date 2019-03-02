@@ -26,7 +26,7 @@ public class CustomerVsCoupons {
 		setCoupon_id(coupon_id);
 	}
 
-	// ---------------------getter+setter-------------------------
+	// ---------------------getters + setters-------------------------
 
 	public int getCustomr_id() {
 		return customer_id;
@@ -40,7 +40,7 @@ public class CustomerVsCoupons {
 	 */
 	public void setCustomr_id(int customer_id) throws InvalidIDException {
 		if (customer_id < 0) {
-			throw new InvalidIDException("Error. Id must apear on apear on Data Base and cannot be negative ");
+			throw new InvalidIDException("Error. Invalid  customer ID");
 		}
 
 		else
@@ -53,7 +53,7 @@ public class CustomerVsCoupons {
 
 	public void setCoupon_id(int coupon_id) throws InvalidIDException {
 		if (coupon_id < 0) {
-			throw new InvalidIDException("Error. Id must apear on apear on Data Base and cannot be negative");
+			throw new InvalidIDException("Error. Invalid coupon ID");
 		} else
 			this.coupon_id = coupon_id;
 	}

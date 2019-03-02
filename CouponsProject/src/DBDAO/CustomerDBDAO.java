@@ -12,27 +12,29 @@ import javaBeans.ConnectionPool;
 
 public class CustomerDBDAO implements CustomerDAO<Customer> {
 	/**
-	 * @param customer will let me manipulate data on the CUSTOMER table's data
-	 *                 members on the DB
+	 * @param customer allows to manipulate data in the Customers table in the database
 	 * @throws Exception , SQLException
 	 */
 	private ConnectionPool connectionPool = ConnectionPool.getInstance();
 
 	@Override
-	public boolean isCustomerExists(String email, String password) throws Exception {
+	public boolean doesCustomerExist(String email, String password) throws Exception {
+		// init
 		Connection connection = null;
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
-
-			String sql = String.format("SELECT Count(*) AS Count FROM CUSTOMERS WHERE EMAIL ='%s' AND PASSWORD = '%s'",
+			// prepare query
+			String sql = String.format("SELECT COUNT(*) AS count FROM Customers WHERE email = '%s' AND password = '%s'",
 					email, password);
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+				// execute
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 					resultSet.next();
 
-					int count = resultSet.getInt("Count");
+					// return answer
+					int count = resultSet.getInt("count");
 
 					return count > 0;
 				}
@@ -45,25 +47,27 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 	@Override
 	public void addCustomer(Customer customer) throws Exception {
-		if (isCustomerExists(customer.getEmail(), customer.getPassword())) {
-			throw new ObjectExists("This Customer already exists on the Data Base");
+		if (doesCustomerExist(customer.getEmail(), customer.getPassword())) {
+			throw new ObjectExists("This Customer already exists in the database");
 		} else {
-
+			// init
 			Connection connection = null;
 
 			try {
-
+				// get connection
 				connection = connectionPool.getConnection();
-
+				
+				// prepare query
 				String sql = String.format(
-						"INSERT INTO CUSTOMERS (FIRST_NAME,LAST_NAME, EMAIL, PASSWORD) VALUES('%s', '%s', '%s','%s')",
+						"INSERT INTO Customers (first_name, last_name, email, password) VALUES('%s', '%s', '%s','%s')",
 						customer.getFirst_name(), customer.getLast_name(), customer.getEmail(), customer.getPassword());
 
 				try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 						PreparedStatement.RETURN_GENERATED_KEYS)) {
-
+					// execute
 					preparedStatement.executeUpdate();
 
+					// get new id assigned by db
 					try (ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
 						resultSet.next();
 						int id = resultSet.getInt(1);
@@ -79,18 +83,19 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 	@Override
 	public void updateCustomer(Customer customer) throws Exception {
-
+		// init
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
-
+			
+			// prepare query
 			String sql = String.format(
-					"UPDATE CUSTOMERS SET FIRST_NAME='%s', LAST_NAME='%s', EMAIL='%s', PASSWORD='%s' WHERE CUSTOMER_ID=%d",
+					"UPDATE Customers SET first_name = '%s', last_name = '%s', email = '%s', password = '%s' WHERE customer_id = %d",
 					customer.getFirst_name(), customer.getLast_name(), customer.getEmail(), customer.getPassword(),
 					customer.getId());
-			System.out.println("Updated Succesfully!");
+			System.out.println("Customer updated succesfully!");
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
 			} catch (Exception e) {
@@ -113,8 +118,8 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("DELETE FROM CUSTOMERS WHERE CUSTOMER_ID=%d", customerID);
-			String cstmrSql = String.format("DELETE FROM CUSTOMERS_VS_COUPONS WHERE CUSTOMER_ID=%d", customerID);
+			String sql = String.format("DELETE FROM Customers WHERE id = %d", customerID);
+			String cstmrSql = String.format("DELETE FROM Customers_vs_Coupons WHERE customer_id = %d", customerID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
 				System.out.println("Deleted Succesfully");
@@ -122,7 +127,7 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 			try (PreparedStatement preparedStatement = connection.prepareStatement(cstmrSql)) {
 				System.out.println("Deleting all customer purchase history.");
 				preparedStatement.executeUpdate();
-				System.out.println("Delete succsesful!");
+				System.out.println("Deleted succsesfully");
 			}
 
 		} finally {
@@ -137,7 +142,7 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 		try {
 			connection = connectionPool.getConnection();
 
-			String sql = "SELECT * FROM CUSTOMERS";
+			String sql = "SELECT * FROM Customers";
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -147,11 +152,11 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 					while (resultSet.next()) {
 
-						int id = resultSet.getInt("CUSTOMER_ID");
-						String first_name = resultSet.getString("FIRST_NAME");
-						String last_name = resultSet.getString("LAST_NAME");
-						String email = resultSet.getString("EMAIL");
-						String password = resultSet.getString("PASSWORD");
+						int id = resultSet.getInt("id");
+						String first_name = resultSet.getString("first_name");
+						String last_name = resultSet.getString("last_name");
+						String email = resultSet.getString("email");
+						String password = resultSet.getString("password");
 						allCustomers = getAllCustomers();
 
 						Customer customer = new Customer(id, first_name, last_name, email, password);
@@ -168,14 +173,14 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 	}
 
 	@Override
-	public Customer getOneCustomer(int customerID) throws Exception {
+	public Customer getCustomerByID(int customerID) throws Exception {
 
 		Connection connection = null;
 
 		try {
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM CUSTOMERS WHERE CUSTOMER_ID=%d", customerID);
+			String sql = String.format("SELECT * FROM Customers WHERE customer_id = %d", customerID);
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -183,14 +188,14 @@ public class CustomerDBDAO implements CustomerDAO<Customer> {
 
 					resultSet.next();
 
-					int id = resultSet.getInt("CUSTOMER_ID");
-					String first_name = resultSet.getString("FIRST_NAME");
-					String last_name = resultSet.getString("LAST_NAME");
-					String email = resultSet.getString("EMAIL");
-					String password = resultSet.getString("PASSWORD");
+					int id = resultSet.getInt("id");
+					String first_name = resultSet.getString("first_name");
+					String last_name = resultSet.getString("last_name");
+					String email = resultSet.getString("email");
+					String password = resultSet.getString("password");
 
 					Customer customer = new Customer(id, first_name, last_name, email, password);
-					System.out.println("get one customer complete"+customer.toString());
+					System.out.println(customer.toString());
 					return customer;
 				}
 			}

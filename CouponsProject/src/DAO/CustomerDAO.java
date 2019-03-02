@@ -12,7 +12,7 @@ public interface CustomerDAO<T> {
 	 * @param email is the customer email address
 	 * @return void
 	 */
-	boolean isCustomerExists(String email, String password) throws Exception;
+	boolean doesCustomerExist(String email, String password) throws Exception;
 
 	void addCustomer(Customer customer) throws Exception;
 
@@ -22,5 +22,5 @@ public interface CustomerDAO<T> {
 	
 	ArrayList<Customer> getAllCustomers() throws Exception;
 
-	Customer getOneCustomer(int customerID) throws Exception;
+	Customer getCustomerByID(int customerID) throws Exception;
 }

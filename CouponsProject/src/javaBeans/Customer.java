@@ -9,7 +9,7 @@ import exceptionHandling.ShortStringException;
 
 public class Customer {
 	/**
-	 * customer bean java file props setters getters constructor and a toString
+	 * Customer bean java file props setters getters constructor and a toString
 	 * method regex for email validation
 	 */
 	// ---------------------prop----------------------------------
@@ -20,7 +20,7 @@ public class Customer {
 	// ---------------------constructor--------------------------------
 	/**
 	 * 
-	 * @param id         the customer id in the CUSTOMER table on the DB
+	 * @param id         the customer id in the Customers table in the DB
 	 * @param first_name customer's first name
 	 * @param last_name  customer's last name
 	 * @param email      customer's email
@@ -49,20 +49,19 @@ public class Customer {
 
 
 
-	// ---------------------getter+setter-------------------------
+	// ---------------------getters + setters-------------------------
 	public int getId() {
 		return id;
 	}
 
 	/**
-	 * 
 	 * @param id the customer's id in the CUSTOMER table on the DB
 	 * @throws InvalidIDException declared in exceptionHandling package
 	 * @see exceptionHandling.InvalidIDException
 	 */
 	public void setId(int id) throws InvalidIDException {
 		if (id < 0) {
-			throw new InvalidIDException("Error. ID cannot be negative");
+			throw new InvalidIDException("Error. ID must be non-negative");
 		} else
 			this.id = id;
 	}
@@ -111,7 +110,7 @@ public class Customer {
 		if (validate(email)) {
 			this.email = email;
 		} else
-			throw new EmailException("Error. Email is invalid, must be longer then 5 chareckters and contain `@`");
+			throw new EmailException("Error. Email is invalid, must be longer than 5 characters and contain `@`");
 	}
 
 	public String getPassword() {
@@ -128,8 +127,8 @@ public class Customer {
 	// ---------------------methods--------------------------------
 	@Override
 	public String toString() {
-		return "Customer ID: " + id + ",\nFirst name: " + first_name + ",\nLast name: " + last_name + ",\neMail: "
-				+ email + ",\nPassword: " + password + ". ";
+		return "Customer ID: " + id + "\nFirst name: " + first_name + "\nLast name: " + last_name + "\nemail: "
+				+ email + "\nPassword: " + password;
 	}
 
 	public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",

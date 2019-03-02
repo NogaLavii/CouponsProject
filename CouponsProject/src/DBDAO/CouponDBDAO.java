@@ -17,26 +17,29 @@ import javaBeans.Coupon;
 public class CouponDBDAO implements CouponDAO<Coupon> {
 	/**
 	 * 
-	 * @param coupon will let me manipulate data on the COUPON table's data members
-	 *               on the DB
+	 * @param CouponDBDAO allows to manipulate data in the Coupons table in the database
 	 * @throws Exception , SQLException
 	 */
 	// private ConnectionPool connectionPool;
 	private ConnectionPool connectionPool = ConnectionPool.getInstance();
 
 	@Override
-	public boolean isCouponExists(String title, int companyID) throws Exception {
+	public boolean doesCouponExist(String title, int companyID) throws Exception {
+		// init Connection
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
-			String sql = String.format("SELECT Count(*) AS Count FROM COUPONS WHERE TITLE = '%s' AND COMPANY_ID='%s'  ",
+			
+			// prepare query
+			String sql = String.format("SELECT COUNT(*) AS count FROM Coupons WHERE title = '%s' AND company_id = '%s' ",
 					title, companyID);
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 					resultSet.next();
-					int count = resultSet.getInt("Count");
+					int count = resultSet.getInt("count");
 					return count > 0;
 				}
 
@@ -53,19 +56,26 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 		}
 	}
 
-	public boolean isCouponPurchaseExists(int customerID, int couponID) throws Exception {
+	public boolean isCouponPurchased(int customerID, int couponID) throws Exception {
+		// init
 		Connection connection = null;
+		
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
+			
+			// prepare query
 			String sql = String.format(
-					"SELECT COUNT(*) AS COUNT FROM CUSTOMERS_VS_COUPONS WHERE CUSTOMER_ID=%d AND COUPON_ID=%d",
+					"SELECT COUNT(*) AS count FROM Customers_vs_Coupons WHERE customer_id = %d AND coupon_id = %d",
 					customerID, couponID);
 
+			// execute query
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
+					
+					// return answer
 					resultSet.next();
 					int count = resultSet.getInt("Count");
-
 					return count > 0;
 
 				} catch (Exception e) {
@@ -84,27 +94,32 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 
 	@Override
 	public void addCoupon(Coupon coupon) throws Exception {
-		if (isCouponExists(coupon.getTitle(), coupon.getCompany_id())) {
-			throw new ObjectExists("This Coupon already exists on the Data Base");
-		} else {
-
+		if (doesCouponExist(coupon.getTitle(), coupon.getCompany_id())) {
+			throw new ObjectExists("This coupon already exists in the Data Base");
+		}
+		else {
+			// init
 			Connection connection = null;
+			
 			try {
-				System.out.println("entering");
+				// get connection
 				connection = connectionPool.getConnection();
+				
+				// prepare query
 				String sql = String.format(
-						"INSERT INTO COUPONS(company_id ,category_id ,title ,description ,"
+						"INSERT INTO Coupons (company_id ,category_id ,title ,description ,"
 								+ " start_date , end_date, amount, price, image) "
 								+ "VALUES (%d, %d, '%s', '%s','%s', '%s', %d, '%.2f', '%s' ) ",
 						coupon.getCompany_id(), coupon.getCategory_id(), coupon.getTitle(), coupon.getDescription(),
 						new java.sql.Date(coupon.getStart_date().getTime()),new java.sql.Date(coupon.getEnd_date().getTime()),
 						coupon.getAmount(), coupon.getPrice(),coupon.getImage());
-
+				
 				try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 						PreparedStatement.RETURN_GENERATED_KEYS)) {
+				// execute
+				preparedStatement.executeUpdate();
 
-					preparedStatement.executeUpdate();
-
+				// report success
 					try (ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
 						resultSet.next();
 						int id = resultSet.getInt(1);
@@ -123,15 +138,21 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	@Override
 	public void updateCoupon(Coupon coupon) throws Exception {
 
+		// init Connection
 		Connection connection = null;
+		
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
+			
+			// prepare query
 			String sql = String.format(
-					" UPDATE COUPONS SET  CATEGORY_ID=%d, TITLE = '%s',DESCRIPTION='%s',START_DATE= %tD,"
-							+ "END_DATE=%tD,AMOUNT=%d, PRICE= %.2f,IMAGE= '%s' WHERE COUPON_ID = %d",
+					" UPDATE Coupons SET category_id = %d, title = '%s', description = '%s', start_date = %tD,"
+							+ "end_date = %tD, amount = %d, price = %.2f, image = '%s' WHERE coupon_id = %d",
 					coupon.getCategory_id(), coupon.getTitle(), coupon.getDescription(), coupon.getStart_date(),
 					coupon.getEnd_date(), coupon.getPrice(), coupon.getImage(), coupon.getId());
-			System.out.println("update coupons has done");
+
+			// execute and report success
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
 				System.out.println("Coupon Updated Succesfully");
@@ -143,28 +164,34 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	public ArrayList<Coupon> getAllCoupons(int companyId) throws Exception {
+		
+		// init Connection
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM COUPONS WHERE COMPANY_ID=%d", companyId);
+			// prepare query
+			String sql = String.format("SELECT * FROM Coupons WHERE company_id = %d", companyId);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+				// execute
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 					ArrayList<Coupon> AllCoupons = new ArrayList<Coupon>();
 
+					// get results and convert them into Coupon objects
 					while (resultSet.next()) {
-						int id = resultSet.getInt("COUPON_ID");
-						int company_id = resultSet.getInt("COMPANY_ID");
-						int category_id = resultSet.getInt("CATEGORY_ID");
-						String title = resultSet.getString("TITLE");
-						String description = resultSet.getString("DESCRIPTION");
-						Date start_date = resultSet.getDate("START_DATE");
-						Date end_date = resultSet.getDate("END_DATE");
-						int amount = resultSet.getInt("AMOUNT");
-						double price = resultSet.getDouble("PRICE");
-						String image = resultSet.getString("IMAGE");
+						int id = resultSet.getInt("id");
+						int company_id = resultSet.getInt("company_id");
+						int category_id = resultSet.getInt("category_id");
+						String title = resultSet.getString("title");
+						String description = resultSet.getString("description");
+						Date start_date = resultSet.getDate("start_date");
+						Date end_date = resultSet.getDate("end_date");
+						int amount = resultSet.getInt("amount");
+						double price = resultSet.getDouble("price");
+						String image = resultSet.getString("image");
 
 						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
 								end_date, amount, price);
@@ -180,33 +207,38 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 		}
 	}
 
-	public ArrayList<Coupon> getCouponsByCtgry(int categoryID, int companyID) throws Exception {
-		ArrayList<Coupon> catgoryCouponList = new ArrayList<Coupon>();
+	public ArrayList<Coupon> getCouponsByCategory(int categoryID, int companyID) throws Exception {
 		
+		// init
+		ArrayList<Coupon> catgoryCouponList = new ArrayList<Coupon>();
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM COUPONS WHERE CATEGORY_ID=%d AND COMPANY_ID=%d", categoryID,
-					companyID);
+			// prepare query
+			String sql = String.format("SELECT * FROM Coupons WHERE category_id = %d AND company_id = %d",
+					categoryID, companyID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+				// execute
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them into Coupon objects
 					while (resultSet.next()) {
-						int id = resultSet.getInt("COUPON_ID");
-						int company_id = resultSet.getInt("COMPANY_ID");
-						int category_id = resultSet.getInt("CATEGORY_ID");
-						String title = resultSet.getString("TITLE");
-						String description = resultSet.getString("DESCRIPTION");
-						Date start_date = resultSet.getDate("START_DATE");
-						Date end_date = resultSet.getDate("END_DATE");
-						int amount = resultSet.getInt("AMOUNT");
-						double price = resultSet.getDouble("PRICE");
-						String image = resultSet.getString("IMAGE");
+						int id = resultSet.getInt("id");
+						int company_id = resultSet.getInt("company_id");
+						int category_id = resultSet.getInt("category_id");
+						String title = resultSet.getString("title");
+						String description = resultSet.getString("description");
+						Date start_date = resultSet.getDate("start_date");
+						Date end_date = resultSet.getDate("end_date");
+						int amount = resultSet.getInt("amount");
+						double price = resultSet.getDouble("price");
+						String image = resultSet.getString("image");
 
-						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
-								end_date, amount, price);
+						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image,
+								start_date, end_date, amount, price);
 						catgoryCouponList.add(coupon);
 						catgoryCouponList = getCouponsByCtgry(categoryID, company_id);
 					}
@@ -219,30 +251,34 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 
 	}
 
-	public Coupon getOneCoupon(int couponID) throws Exception {
+	public Coupon getCouponByID(int couponID) throws Exception {
 
+		// init
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM COUPONS WHERE COUPON_ID=%d", couponID);
+			// prepare query
+			String sql = String.format("SELECT * FROM Coupons WHERE id = %d", couponID);
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+				// execute
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// convert result into Coupon object
 					resultSet.next();
-					int id = resultSet.getInt("COUPON_ID");
-					int company_id = resultSet.getInt("COMPANY_ID");
-					int category_id = resultSet.getInt("CATEGORY_ID");
-					int amount = resultSet.getInt("AMOUNT");
-					String title = resultSet.getString("TITLE");
-					String description = resultSet.getString("DESCRIPTION");
-					Date start_date = resultSet.getDate("START_DATE");
-					Date end_date = resultSet.getDate("END_DATE");
-					String image = resultSet.getString("IMAGE");
-					double price = resultSet.getDouble("PRICE");
+					int id = resultSet.getInt("id");
+					int company_id = resultSet.getInt("company_id");
+					int category_id = resultSet.getInt("category_id");
+					int amount = resultSet.getInt("amount");
+					String title = resultSet.getString("title");
+					String description = resultSet.getString("description");
+					Date start_date = resultSet.getDate("start_date");
+					Date end_date = resultSet.getDate("end_date");
+					String image = resultSet.getString("image");
+					double price = resultSet.getDouble("price");
 
 					Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
 							end_date, amount, price);
@@ -258,14 +294,16 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 
 	@Override
 	public void deleteCoupon(int couponID) throws Exception {
+		// init
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("DELETE FROM COUPONS WHERE COUPON_ID=%d", couponID);
-			String custSql = String.format("DELETE FROM CUSTOMERSVSCOUPONS WHERE COUPON_ID=%d", couponID);
+			// prepare and execute queries
+			String sql = String.format("DELETE FROM Coupons WHERE id = %d", couponID);
+			String custSql = String.format("DELETE FROM Customers_vs_Coupons WHERE coupon_id = %d", couponID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
 			}
@@ -273,7 +311,10 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 				System.out.println("Deleting coupon purchase history.");
 				preparedStatement.executeUpdate();
 			}
+			
+			// report success
 			System.out.println("Deleted succesfully");
+			
 		} finally {
 			connectionPool.restoreConnection(connection);
 		}
@@ -281,22 +322,26 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	@Override
-	public void addCouponPurchase(int customerID, int couponID) throws Exception {
+	public void purchaseCoupon(int customerID, int couponID) throws Exception {
 
-		if (!isCouponAvailble(couponID) || isCouponPurchaseExists(customerID, couponID)) {
+		if (!isCouponAvailble(couponID) || isCouponPurchased(customerID, couponID)) {
 			throw new ObjectExists("Coupon is not available");
 		} else {
+			// init
 			Connection connection = null;
 			try {
+				// get connection
 				connection = connectionPool.getConnection();
-				String sql = String.format("INSERT INTO CUSTOMERS_VS_COUPONS(CUSTOMER_ID , COUPON_ID)VALUES(%d, %d)",
+				// prepare query
+				String sql = String.format("INSERT INTO Customers_vs_Coupons (customer_id, coupon_id) VALUES(%d, %d)",
 						customerID, couponID);
-				String amountSet = String.format("UPDATE COUPONS SET AMOUNT=(AMOUNT-1) WHERE COUPON_ID=%d ", couponID);
+				String amountSet = String.format("UPDATE Coupons SET amount = (amount-1) WHERE id = %d ", couponID);
 				try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 						PreparedStatement.RETURN_GENERATED_KEYS)) {
-
+					// execute
 					preparedStatement.executeUpdate();
-					System.out.println("Coupon purchase succesfully");
+					// report success
+					System.out.println("Coupon purchased succesfully");
 
 				}
 				try (PreparedStatement preparedStatement = connection.prepareStatement(amountSet,
@@ -313,17 +358,20 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	@Override
 	public void deleteCouponPurchase(int customerID, int couponID) throws Exception {
 
+		// init
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("DELETE FROM CUSTOMERS_VS_COUPONS WHERE COUPON_ID=%d", couponID);
+			// prepare query
+			String sql = String.format("DELETE FROM Customers_vs_Coupons WHERE coupon_id = %d", couponID);
 
+			// execute and report success
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
-				System.out.println("Delete coupon purchase complete.");
+				System.out.println("Purchase deleted successdsfully");
 			}
 
 		} finally {
@@ -333,30 +381,33 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	public ArrayList<Coupon> getCouponsByPrice(int companyID, double couponPrice) throws Exception {
-
+		// init Connection
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
-			String sql = String.format("SELECT FROM COPOUNS WHERE COMPANY_ID=%d AND PRICE =%.2f", companyID,
-					couponPrice);
+			
+			// prepare query
+			String sql = String.format("SELECT FROM Coupons WHERE company_id = %d AND price = %.2f",
+					companyID, couponPrice);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+				// execute query
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them into Coupon objects
 					ArrayList<Coupon> couponPriceList = new ArrayList<>();
 					while (resultSet.next()) {
-						int id = resultSet.getInt("COUPON_ID");
-						int company_id = resultSet.getInt("COMPANY_ID");
-						int category_id = resultSet.getInt("CATEGORY_ID");
-						int amount = resultSet.getInt("AMOUNT");
-						String title = resultSet.getString("TITLE");
-						String description = resultSet.getString("DESCRIPTION");
-						Date start_date = resultSet.getDate("START_DATE");
-						Date end_date = resultSet.getDate("END_DATE");
-						String image = resultSet.getString("IMAGE");
-						double price = resultSet.getDouble("PRICE");
+						int id = resultSet.getInt("id");
+						int company_id = resultSet.getInt("company_id");
+						int category_id = resultSet.getInt("category_id");
+						int amount = resultSet.getInt("amount");
+						String title = resultSet.getString("title");
+						String description = resultSet.getString("description");
+						Date start_date = resultSet.getDate("start_date");
+						Date end_date = resultSet.getDate("end_date");
+						String image = resultSet.getString("image");
+						double price = resultSet.getDouble("price");
 
 						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
 								end_date, amount, price);
@@ -373,19 +424,23 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 
 	@Override
 	public boolean isCouponAvailble(int couponID) throws Exception {
+		// init
 		Connection connection = null;
 		int upAmount = 0;
 		Date dateValidate = new Date();
 		Date current = new Date();
+		
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT AMOUNT FROM COUPONS WHERE COUPON_ID=%d", couponID);
-			String dateSql = String.format("SELECT END_DATE FROM COUPONS WHERE COUPON_ID=%d", couponID);
+			// prepare and execute queries
+			String sql = String.format("SELECT amount FROM Coupons WHERE id = %d", couponID);
+			String dateSql = String.format("SELECT end_date FROM Coupons WHERE id = %d", couponID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 					resultSet.next();
-					upAmount = resultSet.getInt("AMOUNT");
+					upAmount = resultSet.getInt("amount");
 				}
 			}
 			try (PreparedStatement preparedStatement = connection.prepareStatement(dateSql)) {
@@ -395,6 +450,8 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 					dateValidate = resultSet.getDate("END_DATE");
 				}
 			}
+			
+			// Test validity
 			if (upAmount > 0 && current.after(dateValidate)) {
 				System.out.println("Coupon is available");
 				return true;
@@ -409,29 +466,33 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	@Override
-	public ArrayList<Coupon> getCouponsByCstmr(int customerID) throws Exception {
+	public ArrayList<Coupon> getCouponsByCustomer(int customerID) throws Exception {
 
+		// init
 		ArrayList<Coupon> customerCouponList = new ArrayList<Coupon>();
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM COUPONS WHERE CUSTOMER_ID=%d", customerID);
+			// prepare and execute query
+			String sql = String.format("SELECT * FROM Coupons WHERE customer_id = %d", customerID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them into Coupon objects
 					while (resultSet.next()) {
-						int id = resultSet.getInt("COUPON_ID");
-						int company_id = resultSet.getInt("COMPANY_ID");
-						int category_id = resultSet.getInt("CATEGORY_ID");
-						String title = resultSet.getString("TITLE");
-						String description = resultSet.getString("DESCRIPTION");
-						Date start_date = resultSet.getDate("START_DATE");
-						Date end_date = resultSet.getDate("END_DATE");
-						int amount = resultSet.getInt("AMOUNT");
-						double price = resultSet.getDouble("PRICE");
-						String image = resultSet.getString("IMAGE");
+						int id = resultSet.getInt("id");
+						int company_id = resultSet.getInt("company_id");
+						int category_id = resultSet.getInt("category_id");
+						String title = resultSet.getString("title");
+						String description = resultSet.getString("description");
+						Date start_date = resultSet.getDate("start_date");
+						Date end_date = resultSet.getDate("end_date");
+						int amount = resultSet.getInt("amount");
+						double price = resultSet.getDouble("price");
+						String image = resultSet.getString("image");
 
 						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
 								end_date, amount, price);
@@ -448,18 +509,22 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	@Override
-	public ArrayList<Coupon> getCustomersCouponsByCtgry(int categoryID, int customerID) throws Exception {
+	public ArrayList<Coupon> getCustomersCouponsByCategory(int categoryID, int customerID) throws Exception {
+		// init
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
-			String sql = String.format("SELECT FROM COPOUNS WHERE CATEGORY_ID=%d AND CUSTOMER_ID=%d", categoryID,
-					customerID);
+			
+			// prepare query
+			String sql = String.format("SELECT FROM Coupons WHERE category_id = %d AND customer_id = %d",
+					categoryID, customerID);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+				// execute query
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them into Coupon objects
 					ArrayList<Coupon> customerCouponCtgryList = new ArrayList<>();
 					while (resultSet.next()) {
 						int id = resultSet.getInt("COUPON_ID");
@@ -487,29 +552,33 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 	}
 
 	public ArrayList<Coupon> getCustomersCouponsByPrice(int customerID, double couponPrice) throws Exception {
+		// init
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
-			String sql = String.format("SELECT FROM COPOUNS WHERE CUSTOMER_ID=%d AND PRICE<=%.2f", customerID,
-					couponPrice);
+			
+			// prepare query
+			String sql = String.format("SELECT FROM Coupons WHERE customer_id = %d AND price <= %.2f",
+					customerID, couponPrice);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+				// execute
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them into Coupon objects
 					ArrayList<Coupon> customerCouponPriceList = new ArrayList<>();
 					while (resultSet.next()) {
-						int id = resultSet.getInt("COUPON_ID");
-						int company_id = resultSet.getInt("COMPANY_ID");
-						int category_id = resultSet.getInt("CATEGORY_ID");
-						int amount = resultSet.getInt("AMOUNT");
-						String title = resultSet.getString("TITLE");
-						String description = resultSet.getString("DESCRIPTION");
-						Date start_date = resultSet.getDate("START_DATE");
-						Date end_date = resultSet.getDate("END_DATE");
-						String image = resultSet.getString("IMAGE");
-						double price = resultSet.getDouble("PRICE");
+						int id = resultSet.getInt("id");
+						int company_id = resultSet.getInt("company_id");
+						int category_id = resultSet.getInt("category_id");
+						int amount = resultSet.getInt("amount");
+						String title = resultSet.getString("title");
+						String description = resultSet.getString("description");
+						Date start_date = resultSet.getDate("start_date");
+						Date end_date = resultSet.getDate("end_date");
+						String image = resultSet.getString("image");
+						double price = resultSet.getDouble("price");
 
 						Coupon coupon = new Coupon(id, company_id, category_id, title, description, image, start_date,
 								end_date, amount, price);
@@ -524,13 +593,13 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 		}
 	}
 	
-	public void deleteExpCoupons() throws Exception{
-		System.out.println("Checking for expiared coupons");
+	public void deleteExpiredCoupons() throws Exception{
+		System.out.println("Checking for expiared coupons...");
 		Connection connection=null;
 		try {
 			connection=connectionPool.getConnection();
-			String couponsSql="DELETE FROM COUPONS WHERE END_DATE < CURDATE()";
-			String historySql="DELETE FROM CUSTOMERS_VS_COUPONS WHERE END_DATE < CURDATE()";
+			String couponsSql="DELETE FROM Coupons WHERE end_date < CURDATE()";
+			String historySql="DELETE FROM Customers_vs_Coupons WHERE end_date < CURDATE()";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(couponsSql)) {
 				preparedStatement.executeUpdate();
 			}
@@ -539,13 +608,10 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 				preparedStatement.executeUpdate();
 			}
 
-			System.out.println("Deleted succesfully");
+			System.out.println("Expired coupons deleted succesfully");
 		} finally {
 			connectionPool.restoreConnection(connection);
 		}
-
-	
 	}
-	
 	
 }

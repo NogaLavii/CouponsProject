@@ -13,25 +13,26 @@ public class Company {
 /**
  * Company bean file with exception handling
  */
-	//----------------------prop------------------
+	//----------------------props------------------
 	private int id;
 	private String name;
 	private String email;
 	private String password;
-	ArrayList<Coupon>companysCoupons=new ArrayList<>();
+	ArrayList<Coupon>companyCoupons=new ArrayList<>();
 
 
-	//----------------------constructor-----------
+	//----------------------constructors-----------
 	/**
 	 * 
-	 * @param id company id in the COMPANY table on the data base 
-	 * @param name the company's name
-	 * @param email the email address of the company
-	 * @param password the company's password in our project network
-	 * @param companysCoupons is an arrayList of all the coupons that this company has
+	 * @param id - Company id in the Companies table in the database 
+	 * @param name - Company name
+	 * @param email - Company email address
+	 * @param password - Company's password to access system
+	 * @param companysCoupons - An ArrayList of all the company's coupons
 	 * @throws Exception general exception
 	 * @see exceptionHandling
 	 */
+	
 	public Company(int id, String name, String email, String password) throws Exception {
 		super();
 		setId(id);
@@ -49,21 +50,21 @@ public class Company {
 	}
 
 
-	//----------------------getter+setter-----------
+	//----------------------getters + setters-----------
 
 	public int getId() {
 		return id;
 	}
 
-/**
- * 
- * @param id the company's id on the 	company table on the DB
- * @throws InvalidIDException declared in exceptionHandling package
- * @see exceptionHandling.InvalidIDException
- */
+	/**
+	 * @param id - The company's ID in the Companies table in the DB
+	 * @throws InvalidIDException declared in exceptionHandling package
+	 * @see exceptionHandling.InvalidIDException
+	 */
+	
 	public void setId(int id)throws InvalidIDException {
-		if(id<0) {
-			throw new InvalidIDException("Error. ID cannot be negative");
+		if(id < 0) {
+			throw new InvalidIDException("Error. ID must not be negative");
 		}
 		this.id = id;
 	}
@@ -73,15 +74,15 @@ public class Company {
 		return name;
 	}
 
-/**
- * 
- * @param name the company name
- * @throws ShortStringException declared in exceptionHandling package
- * @see exceptionHandling.ShortStringException
- */
+	/**
+	 * @param name - Company name
+	 * @throws ShortStringException declared in exceptionHandling package
+	 * @see exceptionHandling.ShortStringException
+	 */
+	
 	public void setName(String name)throws ShortStringException {
-	if(name.length()<3) {
-		throw new ShortStringException("Error. Must contain more then 3 charechters");
+	if(name.length() < 3) {
+		throw new ShortStringException("Error. Company name must be composed of at least 3 characters");
 	}
 	else this.name =name;
 	}
@@ -112,35 +113,35 @@ public class Company {
 
 
 	public void setPassword(String password) throws ShortStringException {
-		if(password.length()<3) {
-			throw new ShortStringException("Error. Must contain more then 3 chareckters");
+		if(password.length() < 3) {
+			throw new ShortStringException("Error. Password must be composed of at least 3 characters");
 		}
 		else this.password =password;
 	}
 
 	public ArrayList<Coupon> getCompaniesCoupons() {
-		return companysCoupons;
+		return companyCoupons;
 	}
 
-	public void setCompaniesCoupons(ArrayList<Coupon> companiesCoupons) {
-		this.companysCoupons = companiesCoupons;
+	public void setCompanyCoupons(ArrayList<Coupon> companyCoupons) {
+		this.companyCoupons = companyCoupons;
 	}
+	
 	@Override
 	public String toString() {
-		return "Company ID: " + id + ",\nName: " + name + ",\neMail: " + email + ",\nPassword: " + password + "."+"Coupons: "+"Coupons: "+companysCoupons.toString();
+		return "ID: " + id + "\nName: " + name + "\nemail: " + email + "\nPassword: " + password + "\nCoupons: " + companyCoupons.toString();
 	}
 	
 	public static final Pattern VALID_EMAIL_ADDRESS_REGEX = 
 		    Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-/**
- * @param emailStr this an extremely smart regex that validates if the email address is valid 
- * @return boolean
- */
-		public static boolean validate(String emailStr) {
-		        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
-		        return matcher.find();
-		}
 	
-
-
+	/**
+	 * @param emailStr - Is an extremely smart regex that validates if the email address is valid 
+	 * @return boolean
+	 */
+	public static boolean validate(String emailStr) {
+		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
+		return matcher.find();
+	}
+	
 }

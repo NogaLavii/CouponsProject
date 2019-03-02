@@ -15,32 +15,32 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 
 	/**
 	 * @author Vision
-	 * @param Company company will let me manipulate data on the COMPANY table on
-	 *                the DB
-	 * @throws SQLException , Exception
+	 * @param CompanyDBDAO allows to manipulate data in the Companies table in the DB
+	 * @throws SQLException, Exception
 	 */
 	private ConnectionPool connectionPool = ConnectionPool.getInstance();
 
 	@Override
-	public boolean isCompanyExists(String email, String password) throws Exception {
-
+	public boolean doesCompanyExist(String email, String password) throws Exception
+	{
+		// init Connection object
 		Connection connection = null; 
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT Count(*) AS Count FROM COMPANIES WHERE EMAIL = "
-					+ "'%s' AND PASSWORD = '%s'",
-					email, password);
+			// prepare query
+			String sql = String.format("SELECT Count(*) AS Count FROM Companies WHERE email = "
+					+ "'%s' AND password = '%s'", email, password);
 
+			// Execute query
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
+					
+					// test whether company is returned from the db
 					resultSet.next();
-
 					int count = resultSet.getInt("Count");
-
 					return count > 0;
 				}
 			}
@@ -51,69 +51,83 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 
 	@Override
 	public void addCompany(Company company) throws Exception {
-		if (isCompanyExists(company.getEmail(), company.getPassword())) {
+		
+		if (doesCompanyExist(company.getEmail(), company.getPassword())) {
+			// If the company already exists in the db - bail out
 			throw new ObjectExists("Error. This company exsits on the Data Base already.");
-		} else {
+		}
+		else {
 
+			// init Connection
 			Connection connection = null;
 
 			try {
-
+				// get connection
 				connection = connectionPool.getConnection();
 
+				// prepare query
 				String sql = String.format(
-						"INSERT INTO COMPANIES(COMPANY_NAME, EMAIL, PASSWORD) " + "VALUES('%s', '%s', '%s')",
+						"INSERT INTO Companies(company_name, email, password) " + "VALUES('%s', '%s', '%s')",
 						company.getName(), company.getEmail(), company.getPassword());
-
+				
+				// execute query
 				try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 						PreparedStatement.RETURN_GENERATED_KEYS)) {
 
 					preparedStatement.executeUpdate();
-					System.out.println("Company added Succesefully !");
+					
+					// report success
+					System.out.println("Company added Succesefully");
 					try (ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
 						resultSet.next();
 						int id = resultSet.getInt(1);
-						company.setId(id); // Add the new created id into the company object.
+						// add the newly created id to the company object.
+						company.setId(id);
 					}
 				}
 			} finally {
 				connectionPool.restoreConnection(connection);
 			}
 		}
-
 	}
 
 	@Override
 	public void updateCompany(Company company) throws Exception {
+		// init Connection
 		Connection connection = null;
 
 		try {
-
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("UPDATE COMPANIES SET EMAIL='%s' , PASSWORD='%s' WHERE COMPANY_ID=%d",
-					company.getEmail(),	company.getPassword(),company.getId());
+			// prepare and execute query
+			String sql = String.format("UPDATE Companies SET email = '%s', password = '%s' WHERE company_id = %d",
+					company.getEmail(),	company.getPassword(), company.getId());
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
+				
+				// report success
 				System.out.println("Company updated Succesfully !");
 			}
 		} finally {
 			connectionPool.restoreConnection(connection);
 		}
-
 	}
 
 	@Override
 	public void deleteCompany(int companyID) throws Exception {
 
+		// init Connection
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("DELETE FROM COMPANIES WHERE COMPANY_ID=%d", companyID);
-			String couponSql = String.format("DELETE FROM COUPONS WHERE  COMPANY_ID=%d", companyID);
-			String custVSCop = String.format("DELETE FROM CUSTOMERS_VS_COUPONS WHERE COMPANY_ID=%d", companyID);
+			// prepare queries to remove company and its coupons from all relevant tables
+			String sql = String.format("DELETE FROM Companies WHERE company_id = %d", companyID);
+			String couponSql = String.format("DELETE FROM Coupons WHERE  company_id = %d", companyID);
+			String custVSCop = String.format("DELETE FROM Customers_vs_Coupons WHERE company_id = %d", companyID);
 			System.out.println(sql + "| " + couponSql + "| " + custVSCop);
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 				preparedStatement.executeUpdate();
@@ -137,25 +151,30 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 	@Override
 	public ArrayList<Company> getAllCompanies() throws Exception {
 
+		// init Connection
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = "SELECT * FROM COMPANIES";
+			// prepare query
+			String sql = "SELECT * FROM Companies";
 
+			// execute query
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// get results and convert them to Company objects
 					ArrayList<Company> allCompanies = new ArrayList<Company>();
 
 					while (resultSet.next()) {
 
-						int id = resultSet.getInt("COMPANY_ID");
-						String name = resultSet.getString("COMPANY_NAME");
-						String email = resultSet.getString("EMAIL");
-						String password = resultSet.getString("PASSWORD");
+						int id = resultSet.getInt("company_id");
+						String name = resultSet.getString("company_name");
+						String email = resultSet.getString("email");
+						String password = resultSet.getString("password");
 
 						Company company = new Company(id, name, email, password);
 
@@ -171,23 +190,29 @@ public class CompanyDBDAO implements CompanyDAO<Company> {
 	}
 
 	@Override
-	public Company getOneCompany(int companyID) throws Exception {
+	public Company getCompanyByID(int companyID) throws Exception {
+		
+		// init Connection
 		Connection connection = null;
 
 		try {
+			// get connection
 			connection = connectionPool.getConnection();
 
-			String sql = String.format("SELECT * FROM COMPANIES WHERE COMPANY_ID=%d", companyID);
+			// prepare query
+			String sql = String.format("SELECT * FROM Companies WHERE company_id = %d", companyID);
 
+			// execute query
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
+					// Select requested company from results and convert it to Company object
 					resultSet.next();
 
-					String name = resultSet.getString("COMPANY_NAME");
-					String email = resultSet.getString("EMAIL");
-					String password = resultSet.getString("PASSWORD");
+					String name = resultSet.getString("company_name");
+					String email = resultSet.getString("email");
+					String password = resultSet.getString("password");
 
 					Company company = new Company(companyID, name, email, password);
 					System.out.println(company);

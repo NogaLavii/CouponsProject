@@ -6,7 +6,6 @@ package javaBeans;
  */
 public enum CategoriesEnum {
 	
-	
 	Baby,
 	Baking,
 	Beverages,
@@ -22,6 +21,7 @@ public enum CategoriesEnum {
 	Medicine,
 	PaperProducts,
 	Pets,
-	Snacks,
+	Snacks
+	
 }
 

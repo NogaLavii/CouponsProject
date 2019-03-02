@@ -12,24 +12,17 @@ public class CouponExpritionDailyJob implements Runnable {
 		if(date.getHours()==18 && date.getMinutes()==00&&date.getSeconds()==00) {
 			CouponDBDAO dbdao=new CouponDBDAO();
 			try {
-				dbdao.deleteExpCoupons();
+				dbdao.deleteExpiredCoupons();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
 		}
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		run();
 	}
-	
-	
-	
-	
-
 }

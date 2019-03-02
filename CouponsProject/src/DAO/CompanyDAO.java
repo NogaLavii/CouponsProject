@@ -6,15 +6,13 @@ import javaBeans.Company;
 
 public interface CompanyDAO<T> {
 	/**
-	 * 
-	 * @param email  will be the customer Email	 
-	 * @param password customer password
+	 * @param email - Company email	 
+	 * @param password - Company password
 
 	 * @return void
 	 * @throws Exception general exception 
 	 */
-	boolean isCompanyExists(String email, String password) throws Exception;
-	
+	boolean doesCompanyExist(String email, String password) throws Exception;
 
 	void addCompany(Company company) throws Exception;
 
@@ -24,8 +22,6 @@ public interface CompanyDAO<T> {
 
 	ArrayList<Company> getAllCompanies() throws Exception;
 
-	Company getOneCompany(int companyID) throws Exception;
-	
-	
+	Company getCompanyByID(int companyID) throws Exception;
 	
 }

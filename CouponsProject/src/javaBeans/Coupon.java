@@ -12,18 +12,18 @@ import exceptionHandling.URLException;
 
 public class Coupon{
 	/**
-	 * the coupon bean file, with exception handling, has props setters getters constructor and a toString method 
+	 * The coupon bean file, with exception handling, has props setters getters constructor and a toString method 
 	 */
-	// ---------------------prop----------------------------------
+	// ---------------------prop------------------
 	
-	private int id, company_id,category_id,  amount;
+	private int id, company_id,category_id, amount;
 	private String title, description, image;
 	private Date start_date;
 	private Date end_date;
 	private double price;
-//	CategoriesEnum category;
+    // CategoriesEnum category;
 	
-	// ---------------------constructor--------------------------------
+	// ---------------------constructor---------------------
 	/**
 	 * Creates new coupon with the following parameters
 	 * @param id the coupon's id
@@ -40,8 +40,8 @@ public class Coupon{
 	 * @see exceptionHandling package.
 	 */
 	public Coupon(int id, int company_id, int category_id,  String title, String description, String image,
-								Date start_date,Date end_date,int amount, double price)throws Exception{
-		
+								Date start_date,Date end_date,int amount, double price) throws Exception
+	{
 		super();
 		setId( id);
 		setCompany_id(company_id);
@@ -57,21 +57,22 @@ public class Coupon{
 	
 
 	public Coupon(int company_id, int category_id,  String title, String description,
-		Date start_date, Date end_date,int amount, double price, String image) throws Exception {
-	super();
-	setCompany_id(company_id);
-	setCategory_id(category_id);
-	setTitle(title);
-	setDescription(description);
-	setStart_date(start_date,end_date);
-	setEnd_date(end_date);
-	setAmount(amount);
-	setPrice(price);
-	setImage(image);
-}
+		Date start_date, Date end_date,int amount, double price, String image) throws Exception
+	{
+		super();
+		setCompany_id(company_id);
+		setCategory_id(category_id);
+		setTitle(title);
+		setDescription(description);
+		setStart_date(start_date,end_date);
+		setEnd_date(end_date);
+		setAmount(amount);
+		setPrice(price);
+		setImage(image);
+	}
 
 
-	// ---------------------getter+setter-------------------------
+	// ---------------------getters + setters---------------------
 
 	public int  getCategory_id() {
 		return category_id;
@@ -86,12 +87,12 @@ public class Coupon{
 		return id;
 	}
 
-/**
- * 
- * @param id coupon id
- * @throws InvalidIDException declared in exceptionHandling package
- * @see exceptionHandling.InvalidIDException
- */
+	/**
+	 * 
+	 * @param id coupon id
+	 * @throws InvalidIDException declared in exceptionHandling package
+	 * @see exceptionHandling.InvalidIDException
+	 */
 	public void setId(int id) throws InvalidIDException{
 		if (id<0) {
 			throw new InvalidIDException("Error. ID cannot be negative");
@@ -138,12 +139,14 @@ public class Coupon{
 	public String getDescription() {
 		return description;
 	}
-/**
- * 
- * @param description coupon's description 
- * @throws ShortStringException declared in exceptionHandling package
- * @see exceptionHandling.ShortStringException
- */
+	
+	/**
+	 * 
+	 * @param description coupon's description 
+	 * @throws ShortStringException declared in exceptionHandling package
+	 * @see exceptionHandling.ShortStringException
+	 */
+	
 	public void setDescription(String description)throws ShortStringException{
 		if(description.length()<5){
 			throw new ShortStringException("Error. Description is too short");
@@ -154,17 +157,19 @@ public class Coupon{
 	public String getImage() {
 		return image;
 	}
-/**
- * 
- * @param image url of the coupon image
- * @throws URLException declared in exceptionHandling package
- * @see exceptionHandling.URLException
- */
+	
+	/**
+	 * 
+	 * @param image url of the coupon image
+	 * @throws URLException declared in exceptionHandling package
+	 * @see exceptionHandling.URLException
+	 */
+	
 	public void setImage(String image)throws URLException  {
-	if(image.length()>4 ) {
+	if(image.length() > 4 ) {
 		this.image =image;
 			}
-	else throw new URLException("Error. URL is invalid, must contain more then 4 chareckters and `.png`");
+	else throw new URLException("Error. Invalid URL");
 	}
 
 	public Date getStart_date() {
@@ -179,7 +184,7 @@ public class Coupon{
 	 */
 	public void setStart_date(Date start_date , Date end_date)throws DateException {
 		if(start_date.after(end_date)) {
-			throw new DateException("Error. Start date cannot be after the End date ");
+			throw new DateException("Error. Start date must be before end date ");
 			}
 		this.start_date = start_date;
 	}
@@ -190,7 +195,7 @@ public class Coupon{
 
 	public void setEnd_date(Date end_date) throws DateException{
 		if(end_date.before(start_date)) {
-			throw new DateException("Error. End date cannot be before the Start date");
+			throw new DateException("Error. End date must be after start date");
 			}
 		else this.end_date=end_date;
 	}
@@ -198,24 +203,27 @@ public class Coupon{
 	public double getPrice() {
 		return price;
 	}
-/**
- * @param price coupon's price in double type
- * @throws NegativeException declared in exceptionHandling package
- * @see exceptionHandling.NegativeException
- */
+	
+	/**
+	 * @param price coupon's price in double type
+	 * @throws NegativeException declared in exceptionHandling package
+	 * @see exceptionHandling.NegativeException
+	 */
+	
 	public void setPrice(double price)throws NegativeException{
-	if(price<0) {
-		throw new NegativeException("Error. Price cannot be negative");
+	if(price < 0) {
+		throw new NegativeException("Error. Price must be non-negative");
 	}
 	else this.price = price;
 	}
+	
+	
 	// ---------------------methods--------------------------------
 	@Override
 	public String toString() {
-		return "Coupon ID: " + id + ",\nCompany ID: " + company_id + ",\nCategory ID: " +  ",\nAmount: "
-				+ amount + ",\nTitle: " + title + ",\nDescription=" + description + ",\nImage link: " + image + ",\nStart Date: "
-				+ start_date + ",\nEnd Date: " + end_date + ",\nPrice: " + price +"$.\nCategory: "+category_id+ "\nThank You. ";
+		return "Coupon ID: " + id + "\nCompany ID: " + company_id + "\nCategory ID: " +  "\nAmount: " + amount +
+				"\nTitle: " + title + "\nDescription=" + description + "\nImage link: " + image +
+				"\nStart Date: " + start_date + "\nEnd Date: " + end_date + "\nPrice: " + price +
+				"$\nCategory: "+category_id+ "\nThank You. ";
 	}
-	
-
 }
