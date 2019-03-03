@@ -500,7 +500,7 @@ public class CouponDBDAO implements CouponDAO<Coupon> {
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 					resultSet.next();
 
-					dateValidate = resultSet.getDate("END_DATE");
+					dateValidate = resultSet.getDate("end_date");
 				}
 			}
 
